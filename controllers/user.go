@@ -9,7 +9,17 @@ import (
 )
 
 
-
+// Get Profile
+// @Summary Get the user's profile information
+// @Description Fetches the details of the logged-in user (username, email) based on the provided JWT token
+// @Accept json
+// @Tags auth
+// @SecurityBearer
+// @Produce json
+// @Success 200 {object} models.ResponseMessage
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /user/profile [get]
 func GetProfile(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {

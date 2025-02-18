@@ -33,6 +33,17 @@ func GenerateToken(userID uint) (string, error) {
 	return token.SignedString(jwtSecret)
 }
 
+// Register User
+// @Summary Register a new user
+// @Tags auth
+// @Description Registers a new user with a username, email, and password
+// @Accept json
+// @Produce json
+// @Param request body models.RegisterInput true "User Registration Request"
+// @Success 200 {object} models.ResponseMessage
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /register [post]
 func Register(c *gin.Context) {
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -55,6 +66,18 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully!"})
 }
 
+// Login User
+// @Summary Login a user
+// @Description Logs in a user and returns a JWT token for authentication
+// @Accept json
+// @Tags auth
+
+// @Produce json
+// @Param request body models.LoginInput true "User Login Request"
+// @Success 200 {object} models.ResponseMessage
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /login [post]
 func Login(c *gin.Context) {
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
