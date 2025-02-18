@@ -6,18 +6,12 @@ import (
 	"github.com/telman03/ecom/middleware"
 )
 
-func CartRoutes(r *gin.Engine) {
-	protected := r.Group("/cart")
-	protected.Use(middleware.AuthMiddleware()) // Protect cart routes
+func RegisterCartRoutes(r *gin.Engine) {
+	cartGroup := r.Group("/cart")
+	cartGroup.Use(middleware.AuthMiddleware()) // Protect routes
 
-	protected.POST("/", controllers.AddToCart)
-	protected.GET("/", controllers.GetCart)
-	protected.DELETE("/:id", controllers.RemoveFromCart)
-}
-
-func OrderRoutes(r *gin.Engine) {
-	protected := r.Group("/order")
-	protected.Use(middleware.AuthMiddleware()) // Protect order routes
-
-	protected.POST("/", controllers.PlaceOrder)
+	cartGroup.POST("/add", controllers.AddToCart)
+	cartGroup.GET("/", controllers.GetCart)
+	cartGroup.PUT("/update", controllers.UpdateCart)
+	cartGroup.DELETE("/remove", controllers.RemoveFromCart)
 }

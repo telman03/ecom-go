@@ -26,8 +26,9 @@ func main() {
 	routes.AuthRoutes(r)
 	routes.UserRoutes(r)
 	routes.ProductRoutes(r)
-	routes.CartRoutes(r)
-	routes.OrderRoutes(r)
+    routes.RegisterCartRoutes(r)
+    routes.RegisterOrderRoutes(r)
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.Run(":8080")

@@ -8,101 +8,78 @@ import (
 	"github.com/telman03/ecom/models"
 )
 
-// Add Product to Cart
-// @Summary Add a product to the cart
-// @Description Add a specific quantity of a product to the user's cart
-// @Accept json
+// @Summary Add item to cart
 // @Tags cart
+// @Accept json
 // @Produce json
-// @Success 200 {object} models.ResponseMessage
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
-// @Router /cart [post]
+// @Security BearerAuth
+// @Param data body map[string]int true "Product ID and Quantity"
+// @Success 200 {object} map[string]string "message"
+// @Failure 400 {object} map[string]string "error"
+// @Router /cart/add [post]
 func AddToCart(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+	userID, _ := c.Get("user_id")
 
-	var input models.Cart
+	var input struct {
+		ProductID uint `json:"product_id"`
+		Quantity  int  `json:"quantity"`
+	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Check if the product exists
-	var product models.Product
-	if err := db.DB.First(&product, input.ProductID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-		return
-	}
+	cartItem := models.Cart{UserID: userID.(uint), ProductID: input.ProductID, Quantity: input.Quantity}
+	db.DB.Create(&cartItem)
 
-	// Add or update cart item
-	var cartItem models.Cart
-	if err := db.DB.Where("user_id = ? AND product_id = ?", userID, input.ProductID).First(&cartItem).Error; err != nil {
-		// Product not found in cart, create a new entry
-		input.UserID = userID.(uint)
-		if err := db.DB.Create(&input).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add product to cart"})
-			return
-		}
-	} else {
-		// Update existing cart item
-		cartItem.Quantity += input.Quantity
-		db.DB.Save(&cartItem)
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Product added to cart"})
+	c.JSON(http.StatusOK, gin.H{"message": "Item added to cart"})
 }
 
-// Get Cart
-// @Summary Get the user's cart
-// @Description Get all items in the user's cart
-// @Produce json
+// @Summary View cart
 // @Tags cart
-// @Success 200 {object} models.ResponseMessage
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
+// @Security BearerAuth
+// @Success 200 {array} models.ResponseMessage
 // @Router /cart [get]
 func GetCart(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+	userID, _ := c.Get("user_id")
 
-	var cartItems []models.Cart
-	if err := db.DB.Where("user_id = ?", userID).Find(&cartItems).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cart"})
-		return
-	}
+	var cart []models.Cart
+	db.DB.Where("user_id = ?", userID).Find(&cart)
 
-	c.JSON(http.StatusOK, cartItems)
+	c.JSON(http.StatusOK, cart)
 }
 
-
-// Remove Product from Cart
-// @Summary Remove a product from the cart
+// @Summary Update cart item
 // @Tags cart
-// @Description Remove a specific product from the user's cart by its ID
-// @Param id path int true "Product ID"
-// @Success 200 {object} models.ResponseMessage
-// @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} models.ErrorResponse
-// @Router /cart/{id} [delete]
+// @Accept json
+// @Security BearerAuth
+// @Param data body map[string]int true "Cart ID and Quantity"
+// @Success 200 {object} map[string]string "message"
+// @Router /cart/update [put]
+func UpdateCart(c *gin.Context) {
+	var input struct {
+		CartID   uint `json:"cart_id"`
+		Quantity int  `json:"quantity"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	db.DB.Model(&models.Cart{}).Where("id = ?", input.CartID).Update("quantity", input.Quantity)
+	c.JSON(http.StatusOK, gin.H{"message": "Cart updated"})
+}
+
+// @Summary Remove item from cart
+// @Tags cart
+// @Security BearerAuth
+// @Param cart_id query int true "Cart ID"
+// @Success 200 {object} map[string]string "message"
+// @Router /cart/remove [delete]
 func RemoveFromCart(c *gin.Context) {
-	userID, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
+	cartID := c.Query("cart_id")
+	db.DB.Delete(&models.Cart{}, cartID)
 
-	productID := c.Param("id")
-	if err := db.DB.Where("user_id = ? AND product_id = ?", userID, productID).Delete(&models.Cart{}).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove product from cart"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Product removed from cart"})
+	c.JSON(http.StatusOK, gin.H{"message": "Item removed from cart"})
 }

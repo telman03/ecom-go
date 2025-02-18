@@ -42,70 +42,94 @@ info:
 paths:
   /cart:
     get:
-      description: Get all items in the user's cart
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Get the user's cart
+            items:
+              $ref: '#/definitions/models.ResponseMessage'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: View cart
       tags:
       - cart
+  /cart/add:
     post:
       consumes:
       - application/json
-      description: Add a specific quantity of a product to the user's cart
+      parameters:
+      - description: Product ID and Quantity
+        in: body
+        name: data
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: message
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
+            additionalProperties:
+              type: string
+            type: object
         "400":
-          description: Bad Request
+          description: error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Add a product to the cart
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add item to cart
       tags:
       - cart
-  /cart/{id}:
+  /cart/remove:
     delete:
-      description: Remove a specific product from the user's cart by its ID
       parameters:
-      - description: Product ID
-        in: path
-        name: id
+      - description: Cart ID
+        in: query
+        name: cart_id
         required: true
         type: integer
       responses:
         "200":
-          description: OK
+          description: message
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
-        "400":
-          description: Bad Request
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove item from cart
+      tags:
+      - cart
+  /cart/update:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Cart ID and Quantity
+        in: body
+        name: data
+        required: true
+        schema:
+          additionalProperties:
+            type: integer
+          type: object
+      responses:
+        "200":
+          description: message
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Remove a product from the cart
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update cart item
       tags:
       - cart
   /login:
@@ -138,52 +162,54 @@ paths:
       summary: Login a user
       tags:
       - auth
-  /order:
-    post:
-      consumes:
-      - application/json
-      description: Place an order for all items in the user's cart
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ResponseMessage'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Place an order
-      tags:
-      - order
   /orders:
     get:
-      consumes:
-      - application/json
-      description: Fetches all the orders associated with the authenticated user
-      produces:
-      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Get a list of orders for the logged-in user
+            items:
+              $ref: '#/definitions/models.ResponseMessage'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all orders
       tags:
-      - order
+      - orders
+  /orders/{id}:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ResponseMessage'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get order details
+      tags:
+      - orders
+  /orders/place:
+    post:
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Place an order
+      tags:
+      - orders
   /products:
     get:
       description: Get a list of all available products

@@ -17,37 +17,35 @@ const docTemplate = `{
     "paths": {
         "/cart": {
             "get": {
-                "description": "Get all items in the user's cart",
-                "produces": [
-                    "application/json"
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "tags": [
                     "cart"
                 ],
-                "summary": "Get the user's cart",
+                "summary": "View cart",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ResponseMessage"
+                            }
                         }
                     }
                 }
-            },
+            }
+        },
+        "/cart/add": {
             "post": {
-                "description": "Add a specific quantity of a product to the user's cart",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -57,62 +55,112 @@ const docTemplate = `{
                 "tags": [
                     "cart"
                 ],
-                "summary": "Add a product to the cart",
+                "summary": "Add item to cart",
+                "parameters": [
+                    {
+                        "description": "Product ID and Quantity",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "message",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "error",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
             }
         },
-        "/cart/{id}": {
+        "/cart/remove": {
             "delete": {
-                "description": "Remove a specific product from the user's cart by its ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "tags": [
                     "cart"
                 ],
-                "summary": "Remove a product from the cart",
+                "summary": "Remove item from cart",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Product ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "Cart ID",
+                        "name": "cart_id",
+                        "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "message",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request",
+                    }
+                }
+            }
+        },
+        "/cart/update": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Update cart item",
+                "parameters": [
+                    {
+                        "description": "Cart ID and Quantity",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "message",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -164,71 +212,82 @@ const docTemplate = `{
                 }
             }
         },
-        "/order": {
-            "post": {
-                "description": "Place an order for all items in the user's cart",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
+        "/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "tags": [
-                    "order"
+                    "orders"
                 ],
-                "summary": "Place an order",
+                "summary": "Get all orders",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ResponseMessage"
+                            }
                         }
                     }
                 }
             }
         },
-        "/orders": {
-            "get": {
-                "description": "Fetches all the orders associated with the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
+        "/orders/place": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
                 "tags": [
-                    "order"
+                    "orders"
                 ],
-                "summary": "Get a list of orders for the logged-in user",
+                "summary": "Place an order",
+                "responses": {
+                    "200": {
+                        "description": "message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get order details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ResponseMessage"
+                            }
                         }
                     }
                 }
