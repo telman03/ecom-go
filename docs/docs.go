@@ -120,9 +120,17 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
+                "description": "Logs in a user and returns a JWT token for authentication",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login a user",
                 "parameters": [
                     {
                         "description": "User Login Request",
@@ -164,6 +172,9 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "order"
                 ],
                 "summary": "Place an order",
                 "responses": {
@@ -455,7 +466,12 @@ const docTemplate = `{
         },
         "/user/profile": {
             "get": {
-                "description": "Fetches the details of the logged-in user (username, email) based on the provided JWT token",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the authenticated user's profile using JWT token",
                 "consumes": [
                     "application/json"
                 ],
@@ -465,24 +481,22 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Get the user's profile information",
+                "summary": "Get user profile",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "User profile data",
                         "schema": {
-                            "$ref": "#/definitions/models.ResponseMessage"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }

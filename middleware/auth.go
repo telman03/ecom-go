@@ -20,14 +20,15 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		tokenString := strings.Split(authHeader, "Bearer ")
-		if len(tokenString) < 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
-			c.Abort()
-			return
+		var tokenString string
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			// Swagger is sending only the token without "Bearer "
+			tokenString = authHeader
 		}
 
-		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		})
 
@@ -45,7 +46,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		userID := uint(claims["user_id"].(float64))
-		c.Set("user_id", userID) // Store user ID in context
+		c.Set("user_id", userID)
 
 		c.Next()
 	}

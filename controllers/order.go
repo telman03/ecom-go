@@ -39,6 +39,7 @@ func GetOrders(c *gin.Context) {
 // @Description Place an order for all items in the user's cart
 // @Accept json
 // @Produce json
+// @Tags order
 // @Success 200 {object} models.ResponseMessage
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse

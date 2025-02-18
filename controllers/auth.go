@@ -71,7 +71,6 @@ func Register(c *gin.Context) {
 // @Description Logs in a user and returns a JWT token for authentication
 // @Accept json
 // @Tags auth
-
 // @Produce json
 // @Param request body models.LoginInput true "User Login Request"
 // @Success 200 {object} models.ResponseMessage

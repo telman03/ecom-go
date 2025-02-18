@@ -110,6 +110,9 @@ paths:
       - cart
   /login:
     post:
+      consumes:
+      - application/json
+      description: Logs in a user and returns a JWT token for authentication
       parameters:
       - description: User Login Request
         in: body
@@ -132,6 +135,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.ErrorResponse'
+      summary: Login a user
+      tags:
+      - auth
   /order:
     post:
       consumes:
@@ -153,6 +159,8 @@ paths:
           schema:
             $ref: '#/definitions/models.ErrorResponse'
       summary: Place an order
+      tags:
+      - order
   /orders:
     get:
       consumes:
@@ -332,24 +340,24 @@ paths:
     get:
       consumes:
       - application/json
-      description: Fetches the details of the logged-in user (username, email) based
-        on the provided JWT token
+      description: Retrieve the authenticated user's profile using JWT token
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User profile data
           schema:
-            $ref: '#/definitions/models.ResponseMessage'
-        "400":
-          description: Bad Request
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      summary: Get the user's profile information
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user profile
       tags:
       - auth
 securityDefinitions:
