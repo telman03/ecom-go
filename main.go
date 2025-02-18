@@ -11,11 +11,12 @@ func main() {
     db.InitDB()
 
 
-    db.DB.AutoMigrate(&models.User{})
+    db.DB.AutoMigrate(&models.User{}, &models.Order{})
 
     r := gin.Default()
 
     routes.AuthRoutes(r)
+    routes.UserRoutes(r) 
 
     r.Run(":8080")
 }

@@ -20,8 +20,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		tokenString := strings.Split(authHeader, "Bearer ")[1]
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		tokenString := strings.Split(authHeader, "Bearer ")
+		if len(tokenString) < 2 {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.Abort()
+			return
+		}
+
+		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		})
 
@@ -30,6 +36,16 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid claims"})
+			c.Abort()
+			return
+		}
+
+		userID := uint(claims["user_id"].(float64))
+		c.Set("user_id", userID) // Store user ID in context
 
 		c.Next()
 	}
